@@ -154,8 +154,12 @@ function App() {
                 {
                   acceptedFiles.length > 0 &&
                     <Fragment>
-                      <FileDropIcon>📄</FileDropIcon>
-                      <FileDropName>({ acceptedFiles[0].name })</FileDropName>
+                      <FileDropIcon>
+                        <span aria-label="File" role="img">📄</span>
+                      </FileDropIcon>
+                      <FileDropName>
+                        ({ acceptedFiles[0].name })
+                      </FileDropName>
                     </Fragment>
                 }
               </FileDropComponent>
