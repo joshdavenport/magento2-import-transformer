@@ -90,6 +90,7 @@ exports.handler = async (event, context, callback) => {
     onlyCsvResponse: event.queryStringParameters.only_csv == 1, 
     multiValueSeperator: event.queryStringParameters.multi_value_seperator || '|',
     multiOptionSeperator: event.queryStringParameters.multi_option_seperator || '$',
+    autoStockStatusThreshold: parseInt(event.queryStringParameters.auto_stock_status_threshold) || null
   };
 
   // Create an array to store modified rows in
@@ -180,6 +181,17 @@ exports.handler = async (event, context, callback) => {
         row['additional_attributes'] = convertColumnsToStringKeyValue(additionalAttributes, options.multiValueSeperator);
       }
 
+      // Auto stock status
+      if (options.autoStockStatusThreshold && row['qty'] && row['is_in_stock']) {
+        const qty = parseInt(row['qty']);
+        if (qty >= options.autoStockStatusThreshold) {
+          // In stock
+          row['is_in_stock'] = 1;
+        } else {
+          // Out of stock
+          row['is_in_stock'] = 0;
+        }
+      }
 
       // Remove any and all fake columns
       row = purgeColumns(row, [
