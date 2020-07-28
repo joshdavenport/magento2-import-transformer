@@ -4,15 +4,11 @@ const XLSX = require('xlsx');
 const Formidable = require('formidable');
 
 exports.handler = async (event, context, callback) => {
-  console.log(event);
-
-  console.log(1);
   // Establish options
   const options = {
     onlyCsvResponse: event.queryStringParameters.only_csv == 1, 
   };
 
-  console.log(2);
   try {
     let csvResponse = '';
 
@@ -22,8 +18,6 @@ exports.handler = async (event, context, callback) => {
     stream.push( event.body );
     stream.push( null );
     stream.headers = event.headers;
-
-    console.log(3);
 
     await new Promise((resolve, reject) => {
       form.parse(stream, (err, fields, files) => {
@@ -41,8 +35,6 @@ exports.handler = async (event, context, callback) => {
         }
       });
     });
-
-    console.log(4);
     
     if (options.onlyCsvResponse) {
       // Send response with only the CSV in the body

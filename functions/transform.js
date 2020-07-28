@@ -89,7 +89,7 @@ exports.handler = async (event, context, callback) => {
   const options = {
     onlyCsvResponse: event.queryStringParameters.only_csv == 1, 
     multiValueSeperator: event.queryStringParameters.multi_value_seperator || '|',
-    multiOptionSeperator: event.queryStringParameters.multi_option_seperator || '$',
+    valueGroupSeperator: event.queryStringParameters.value_group_seperator || '$',
     autoStockStatusThreshold: parseInt(event.queryStringParameters.auto_stock_status_threshold) || null
   };
 
@@ -171,7 +171,7 @@ exports.handler = async (event, context, callback) => {
 
           return convertColumnsToStringKeyValue(variations, options.multiValueSeperator);
         })
-        .join(options.multiOptionSeperator);
+        .join(options.valueGroupSeperator);
         row['configurable_variation_labels'] = configurableLabelsByParent[row.sku];
       }
 

@@ -3,6 +3,9 @@ import { useDropzone } from 'react-dropzone';
 import FileSaver from 'file-saver';
 import queryString from 'query-string';
 import styled, { createGlobalStyle } from 'styled-components';
+
+import Error from './components/Error.js';
+
 import formEncode from './util/form-encode';
 const formats = require('./data/formats.json');
 
@@ -65,15 +68,18 @@ font-size: 8px;
 
 function App() {
   // State hooks
+  const [error, setError] = useState('');
   const [format, setFormat] = useState('none');
-  const [multipleOptionSeperator, setMultipleOptionSeperator] = useState('|');
-  const [multipleValueSeperator, setMultipleValueSeperator] = useState('$');
+  const [multipleValueSeperator, setMultipleValueSeperator] = useState(',');
+  const [valueGroupSeperator, setValueGroupSeperator] = useState('|');
   const [autoStockStatusThreshold, setAutoStockStatusThreshold] = useState();
   const [file, setFile] = useState({});
 
   // Submission handling
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, fileName) => {
     e.preventDefault();
+
+    setError('');
   
     const data = { format, file };
     const body = await formEncode(data);
@@ -90,8 +96,8 @@ function App() {
 
     // Build argumenst for the transform step
     const transformArguments = {
-      multi_value_seperator: multipleOptionSeperator,
-      multi_option_seperator: multipleValueSeperator
+      multi_value_seperator: multipleValueSeperator,
+      value_group_seperator: valueGroupSeperator
     };
 
     if(autoStockStatusThreshold) {
@@ -105,10 +111,19 @@ function App() {
       method: 'POST',
       body: processResponse.data
     })).json();
-    
-    // With the transformed data, create a client side download
-    const csvBlob = new Blob([transformResponse.data], { type: 'text/csv;charset=utf-8' })
-    FileSaver.saveAs(csvBlob, 'magento2-import-transformed.csv');
+
+    if (transformResponse.status === 'error') {
+      if (transformResponse.message) {
+        setError(transformResponse.message);
+      } else {
+        setError('An unknown error occurred');
+      }
+    } else {
+      // With the transformed data, create a client side download
+      const csvBlob = new Blob([transformResponse.data], { type: 'text/csv;charset=utf-8' })
+      const csvFileName = fileName.replace(/\.([a-z]*)$/, '') + '.csv';
+      FileSaver.saveAs(csvBlob, csvFileName);
+    }
   };
 
   // Handle file drops
@@ -124,16 +139,16 @@ function App() {
     onDrop,
     multiple: false 
   });
-  
-  const FileDropComponent = acceptedFiles.length ? FileDropActive : FileDrop;
 
+  const FileDropComponent = acceptedFiles.length ? FileDropActive : FileDrop;
 
   // Render
   return (
     <Fragment>
       <GlobalStyle />
       <AppContainer>
-        <form onSubmit={handleSubmit}>
+        <Error error={error} />
+        <form onSubmit={(e) => handleSubmit(e, acceptedFiles[0].name)}>
           <FormField>
             <div {...getRootProps()}>
               <FileDropComponent>
@@ -183,14 +198,14 @@ function App() {
           </FormField>
           <FormField>
             <label>
-              Multiple option seperator
-              <input value={multipleOptionSeperator} onChange={e => setMultipleOptionSeperator(e.target.value)} />
+              Multiple value seperator
+              <input value={multipleValueSeperator} onChange={e => setMultipleValueSeperator(e.target.value)} />
             </label>
           </FormField>
           <FormField>
             <label>
-              Multiple value seperator
-              <input value={multipleValueSeperator} onChange={e => setMultipleValueSeperator(e.target.value)} />
+              Value group seperator
+              <input value={valueGroupSeperator} onChange={e => setValueGroupSeperator(e.target.value)} />
             </label>
           </FormField>
           <FormField>
