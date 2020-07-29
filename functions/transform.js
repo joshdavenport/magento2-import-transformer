@@ -105,13 +105,19 @@ exports.handler = async (event, context, callback) => {
 
     // Index SKUs
     const skuIndex = {};
+    const duplicateSkus = [];
+
     data.forEach((row, i) => {
       if (typeof skuIndex[row.sku] !== 'undefined') {
-        throw new Error(`Duplicate SKU: ${row.sku}`);
+        duplicateSkus.push(row.sku);
       }
 
       skuIndex[row.sku] = i
     });
+
+    if (duplicateSkus.length) {
+      throw new Error(`Can't handle duplicate SKU${duplicateSkus.length.length > 1 ? 's' : ''}: ${duplicateSkus.join(', ')}`);
+    }
 
     // Interdepency info storage
     const configurableChildrenByParent = {};
