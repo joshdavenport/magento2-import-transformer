@@ -1,5 +1,5 @@
 const formEncode = async (data) => {
-    const formData = new FormData();
+    const formData = {};
   
     if (data.file) {
       await new Promise((resolve, reject) => {
@@ -13,9 +13,9 @@ const formEncode = async (data) => {
       });
     }
   
-    Object.keys(data).forEach(dataKey => formData.append(dataKey, data[dataKey]));
+    Object.keys(data).forEach(dataKey => formData[dataKey] = data[dataKey]);
   
-    return formData
+    return JSON.stringify(formData);
 };
 
 export default formEncode;
