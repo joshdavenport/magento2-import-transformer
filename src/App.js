@@ -16,10 +16,7 @@ const GlobalStyle = createGlobalStyle`
 
   body {
     margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    padding: 50px;
   }
 `;
 
