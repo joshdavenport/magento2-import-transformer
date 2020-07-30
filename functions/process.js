@@ -31,8 +31,10 @@ exports.handler = async (event, context, callback) => {
         console.log('[PROCESS] Processing base64 XLSX');
         const workbook = XLSX.read(input.file.replace('data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,', ''), { type: 'base64' });
         console.log('[PROCESS] Converting XLSX to CSV');
+        console.log(`[PROCESS] Found sheet ${workbook.SheetNames[0]}`);
         csvResponse = XLSX.utils.sheet_to_csv(workbook.Sheets[workbook.SheetNames[0]]);
-        console.log('[PROCESS] Finished processing and converting base64 XLSX');
+        console.log('[PROCESS] Finished converting to CSV');
+        console.log('[PROCESS] Finished processing base64 XLSX');
         break;
     }
 
