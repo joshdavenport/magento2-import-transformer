@@ -210,9 +210,11 @@ function App() {
               <input value={valueGroupSeperator} onChange={e => setValueGroupSeperator(e.target.value)} />
             </label>
           </FormField>
-          <FormField>
-            <button type="submit">Transform</button>
-          </FormField>
+          {!loading &&
+            <FormField>
+              <button type="submit">Transform</button>
+            </FormField>
+          }
         </form>
       </AppContainer>
     </Fragment>
