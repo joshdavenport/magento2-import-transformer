@@ -85,6 +85,8 @@ const parseConfigurableAttributes = (configurableAttributes) => {
 }
 
 exports.handler = async (event, context, callback) => {
+  console.log('[TRANSFORM] Starting handler');
+
   // Establish options
   const options = {
     onlyCsvResponse: event.queryStringParameters.only_csv == 1, 
@@ -107,6 +109,7 @@ exports.handler = async (event, context, callback) => {
     const skuIndex = {};
     const duplicateSkus = [];
 
+    console.log('[TRANSFORM] Establishing SKUs');
     data.forEach((row, i) => {
       if (typeof skuIndex[row.sku] !== 'undefined') {
         duplicateSkus.push(row.sku);
@@ -114,6 +117,7 @@ exports.handler = async (event, context, callback) => {
 
       skuIndex[row.sku] = i
     });
+    console.log('[TRANSFORM] Finished establishing SKUs');
 
     if (duplicateSkus.length) {
       throw new Error(`Can't handle duplicate SKU${duplicateSkus.length.length > 1 ? 's' : ''}: ${duplicateSkus.join(', ')}`);
@@ -125,6 +129,8 @@ exports.handler = async (event, context, callback) => {
     const configurableParentByChildren = {};
     const configurableAttributeValuesByChildren = {};
 
+    console.log('[TRANSFORM] Calculating interdependencies');
+    
     // Iterate over rows and store info about interdependencies
     data.forEach(row => {
       // Establish configurable parent/child relationships
@@ -156,8 +162,14 @@ exports.handler = async (event, context, callback) => {
       }
     });
 
+    console.log('[TRANSFORM] Finished calculating interdependencies');
+
+    console.log('[TRANSFORM] Modifying data');
+
     // Iterate over rows and make modifications
-    data.forEach(row => {
+    data.forEach((row, i) => {
+      console.log(`[TRANSFORM] Row ${i+1}`);
+
       // Add any placeholder columns, for consistency
       if (Object.keys(configurableChildrenByParent).length) {
         row['configurable_variations'] = '';
@@ -209,7 +221,10 @@ exports.handler = async (event, context, callback) => {
       // Add final, modified, row to our storage array
       modifiedData.push(row);
     });
+    
+    console.log('[TRANSFORM] Finished modifying data');
   } catch (e) {
+    console.log('[TRANSFORM] Sending error response');
     // Return error feedback
     callback(null, { 
       statusCode: 401, 
@@ -239,4 +254,6 @@ exports.handler = async (event, context, callback) => {
       })
     });
   }
+
+  console.log('[TRANSFORM] Finished handler');
 }
