@@ -24,6 +24,7 @@ const GlobalStyle = createGlobalStyle`
 const AppContainer = styled.div`
 max-width: 500px;
 margin: 0 auto;
+${props => props.isLoading && 'opacity: 0.3;'};
 `;
 
 const FormField = styled.div`
@@ -65,6 +66,7 @@ font-size: 8px;
 
 function App() {
   // State hooks
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [format, setFormat] = useState('none');
   const [multipleValueSeperator, setMultipleValueSeperator] = useState(',');
@@ -76,6 +78,7 @@ function App() {
   const handleSubmit = async (e, fileName) => {
     e.preventDefault();
 
+    setLoading(true);
     setError('');
   
     const data = { format, file };
@@ -121,6 +124,8 @@ function App() {
       const csvFileName = fileName.replace(/\.([a-z]*)$/, '') + '.csv';
       FileSaver.saveAs(csvBlob, csvFileName);
     }
+
+    setLoading(false);
   };
 
   // Handle file drops
@@ -143,7 +148,7 @@ function App() {
   return (
     <Fragment>
       <GlobalStyle />
-      <AppContainer>
+      <AppContainer isLoading={loading}>
         <Error error={error} />
         <form onSubmit={(e) => handleSubmit(e, acceptedFiles[0].name)}>
           <FormField>
