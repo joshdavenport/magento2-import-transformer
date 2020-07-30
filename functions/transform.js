@@ -109,13 +109,16 @@ exports.handler = async (event, context, callback) => {
     const skuIndex = {};
     const duplicateSkus = [];
 
-    console.log('[TRANSFORM] Establishing SKUs');
     data.forEach((row, i) => {
+      if (row.sku.trim().length === 0) {
+        return;
+      }
+      
       if (typeof skuIndex[row.sku] !== 'undefined') {
         duplicateSkus.push(row.sku);
       }
 
-      skuIndex[row.sku] = i
+      skuIndex[row.sku] = i;
     });
     console.log('[TRANSFORM] Finished establishing SKUs');
 
@@ -133,6 +136,10 @@ exports.handler = async (event, context, callback) => {
     
     // Iterate over rows and store info about interdependencies
     data.forEach(row => {
+      if (row.sku.length === 0) {
+        return;
+      }
+
       // Establish configurable parent/child relationships
       if (row.parent_sku && row.configurable_attributes) {
         if (!configurableChildrenByParent[row.parent_sku]) {
@@ -169,6 +176,10 @@ exports.handler = async (event, context, callback) => {
     // Iterate over rows and make modifications
     data.forEach((row, i) => {
       console.log(`[TRANSFORM] Row ${i+1}`);
+
+      if (row.sku.trim().length === 0) {
+        return;
+      }
 
       // Add any placeholder columns, for consistency
       if (Object.keys(configurableChildrenByParent).length) {
